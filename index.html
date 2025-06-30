@@ -4,6 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>RDS Fácil - CSS Construtora</title>
+  <link rel="manifest" href="manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(reg => console.log('Service Worker registrado:', reg))
+          .catch(err => console.log('Service Worker erro:', err));
+      });
+    }
+  </script>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
