@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RDS Fácil - CSS Construtora</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .logo { height: 80px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #000; padding: 8px; text-align: center; }
+    th { background-color: #f0f0f0; }
+    .signature-line { height: 40px; }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <img src="logo-css.png" alt="Logo CSS" class="logo">
+  <div>
+    <label>Data (DD/MM/AA): <input type="text" id="data"></label><br>
+    <label>Dia da semana: <input type="text" id="dia_semana"></label>
+  </div>
+</div>
+
+<h1>Relatório Diário de Serviço - CSS Construtora</h1>
+
+<form id="form-colab">
+  <label>Setor: <input type="text" id="setor" required></label><br><br>
+  <label>Nome: <input type="text" id="nome" required></label>
+  <label>Código: <input type="text" id="codigo" required></label>
+  <label>Matrícula: <input type="text" id="matricula" required></label>
+  <label>Função: <input type="text" id="funcao"></label><br><br>
+  <label>Entrada: <input type="time" id="entrada"></label>
+  <label>Saída: <input type="time" id="saida"></label>
+  <label>Observação: <input type="text" id="obs"></label>
+  <button type="submit">Adicionar</button>
+</form>
+
+<table id="tabela">
+  <thead>
+    <tr>
+      <th>Nome</th><th>Código</th><th>Matrícula</th><th>Função</th>
+      <th>Entrada</th><th>Saída</th><th>Observação</th><th>Assinatura</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+  document.getElementById("form-colab").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const nome = document.getElementById("nome").value;
+    const codigo = document.getElementById("codigo").value;
+    const matricula = document.getElementById("matricula").value;
+    const funcao = document.getElementById("funcao").value;
+    const entrada = document.getElementById("entrada").value;
+    const saida = document.getElementById("saida").value;
+    const obs = document.getElementById("obs").value;
+
+    const tbody = document.querySelector("#tabela tbody");
+    const row = document.createElement("tr");
+
+    row.innerHTML = `<td>${nome}</td><td>${codigo}</td><td>${matricula}</td>
+                     <td>${funcao}</td><td>${entrada}</td><td>${saida}</td>
+                     <td>${obs}</td><td class="signature-line"></td>`;
+    tbody.appendChild(row);
+
+    this.reset();
+  });
+</script>
+
+</body>
+</html>
