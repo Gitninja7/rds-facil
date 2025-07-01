@@ -1,10 +1,11 @@
 {
-  "name": "RDS Fácil",
-  "short_name": "RDSFacil",
-  "start_url": "index.html",
+  "name": "RDS Fácil - CSS Construtora",
+  "short_name": "RDS Fácil",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#3367D6",
+  "theme_color": "#004aad",
+  "description": "Sistema de ponto digital e relatório diário de serviço da CSS Construtora.",
   "icons": [
     {
       "src": "icon-192.png",
@@ -18,3 +19,4 @@
     }
   ]
 }
+Atualiza manifest.json com nome, cores e ícones do PWA
