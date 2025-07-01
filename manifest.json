@@ -1,7 +1,7 @@
 {
   "name": "RDS Fácil - CSS Construtora",
   "short_name": "RDS Fácil",
-  "start_url": ".",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#004aad",
