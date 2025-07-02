@@ -139,15 +139,32 @@
     e.preventDefault();
     const get = id => document.getElementById(id).value;
     const assinatura = document.getElementById("assinatura").checked ? "✔️" : "";
-
     const tbody = document.querySelector("#tabela tbody");
+    // Validação de matrícula duplicada
+    const matricula = get("matricula");
+    let duplicado = false;
+    Array.from(tbody.rows).forEach(row => {
+      if (row.cells[2].innerText === matricula) duplicado = true;
+    });
+    if (duplicado) {
+      alert("Matrícula já cadastrada!");
+      return;
+    }
     const row = document.createElement("tr");
-
     row.innerHTML = `<td>${get("nome")}</td><td>${get("codigo")}</td><td>${get("matricula")}</td>
                      <td>${get("funcao")}</td><td>${get("turno")}</td><td>${get("entrada")}</td>
                      <td>${get("intervalo")}</td><td>${get("saida")}</td><td>${get("local")}</td>
                      <td>${get("tempo")}</td><td>${get("atividade")}</td><td>${get("situacao")}</td>
                      <td>${get("veiculo")}</td><td>${assinatura}</td>`;
+    // Botão de remover
+    const btnRemover = document.createElement("button");
+    btnRemover.textContent = "Remover";
+    btnRemover.onclick = function() {
+      if (confirm("Deseja remover este colaborador?")) {
+        tbody.removeChild(row);
+      }
+    };
+    row.appendChild(document.createElement("td")).appendChild(btnRemover);
     tbody.appendChild(row);
     this.reset();
   });
