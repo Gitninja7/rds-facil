@@ -1,0 +1,221 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RDS Fácil - Escala Turbo</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+    h1 { color: #004aad; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+    th, td { border: 1px solid #000; padding: 8px; text-align: center; }
+    th { background-color: #004aad; color: white; }
+    input, select, button { margin: 4px; padding: 6px; }
+    label { margin-right: 8px; }
+    .controls { margin: 15px 0; }
+  </style>
+</head>
+<body>
+
+<h1>RDS Fácil - Edição Turbo (800 colaboradores? Vem tranquilo!)</h1>
+
+<div class="controls">
+  <label>Filtrar por setor: <input type="text" id="filtro_setor" oninput="filtrarTabela()"></label>
+  <label>Buscar por nome: <input type="text" id="buscar_nome" oninput="filtrarTabela()"></label>
+  <button onclick="importarJSON()">📥 Importar JSON</button>
+  <input type="file" id="fileInput" style="display:none" accept=".json"/>
+  <button onclick="exportarJSON()">📦 Exportar JSON</button>
+  <button onclick="exportarExcel()">📊 Exportar Excel</button>
+  <button onclick="limparTabela()">🧹 Limpar Tabela</button>
+</div>
+
+<form id="form-colab">
+  <label>Setor: <input type="text" id="setor" required></label>
+  <label>Nome: <input type="text" id="nome" required></label>
+  <label>Matrícula: <input type="text" id="matricula" required></label>
+  <label>Função: <input type="text" id="funcao" required></label>
+  <label>Entrada: <input type="time" id="entrada"></label>
+  <label>Saída: <input type="time" id="saida"></label>
+  <button type="submit">Adicionar</button>
+</form>
+
+<table id="tabela">
+  <thead>
+    <tr>
+      <th>Setor</th><th>Nome</th><th>Matrícula</th><th>Função</th>
+      <th>Entrada</th><th>Saída</th><th>Horas Trabalhadas</th><th>Ações</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+const form = document.getElementById("form-colab");
+const tabela = document.getElementById("tabela").querySelector("tbody");
+const fileInput = document.getElementById("fileInput");
+
+function calcularHoras(entrada, saida) {
+  if (!entrada || !saida) return "";
+  const [eh, em] = entrada.split(":").map(Number);
+  const [sh, sm] = saida.split(":").map(Number);
+  let total = (sh * 60 + sm) - (eh * 60 + em);
+  if (total < 0) total += 1440;
+  const horas = Math.floor(total / 60);
+  const minutos = total % 60;
+  return `${horas}h${minutos.toString().padStart(2, "0")}`;
+}
+
+form.addEventListener("submit", function(e) {
+  e.preventDefault();
+  const dados = ["setor", "nome", "matricula", "funcao", "entrada", "saida"].map(id => document.getElementById(id).value);
+  const [setor, nome, matricula, funcao, entrada, saida] = dados;
+  // Validação de matrícula duplicada
+  let duplicado = false;
+  Array.from(tabela.rows).forEach(row => {
+    if (row.cells[2].textContent === matricula) duplicado = true;
+  });
+  if (duplicado) {
+    alert("Matrícula já cadastrada!");
+    return;
+  }
+  const horas = calcularHoras(entrada, saida);
+  const row = tabela.insertRow();
+  [setor, nome, matricula, funcao, entrada, saida, horas].forEach(text => row.insertCell().textContent = text);
+  // Botão de remover
+  const cellAcao = row.insertCell();
+  const btnRemover = document.createElement("button");
+  btnRemover.textContent = "Remover";
+  btnRemover.onclick = function() {
+    if (confirm("Deseja remover este colaborador?")) {
+      tabela.deleteRow(row.rowIndex - 1);
+      salvarLocal();
+    }
+  };
+  cellAcao.appendChild(btnRemover);
+  salvarLocal();
+  form.reset();
+});
+
+function exportarJSON() {
+  const dados = Array.from(tabela.rows).map(r => ({
+    setor: r.cells[0].textContent,
+    nome: r.cells[1].textContent,
+    matricula: r.cells[2].textContent,
+    funcao: r.cells[3].textContent,
+    entrada: r.cells[4].textContent,
+    saida: r.cells[5].textContent
+  }));
+  const blob = new Blob([JSON.stringify(dados, null, 2)], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "rds_dados.json";
+  a.click();
+  URL.revokeObjectURL(url);
+  alert("Exportação concluída!");
+}
+
+function importarJSON() {
+  fileInput.value = ""; // Limpa seleção anterior
+  fileInput.onchange = null;
+  fileInput.addEventListener("change", function handler() {
+    fileInput.removeEventListener("change", handler);
+    const file = fileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const dados = JSON.parse(reader.result);
+        let count = 0;
+        dados.forEach(item => {
+          // Evita duplicidade de matrícula
+          let duplicado = false;
+          Array.from(tabela.rows).forEach(row => {
+            if (row.cells[2].textContent === item.matricula) duplicado = true;
+          });
+          if (!duplicado) {
+            const row = tabela.insertRow();
+            const horas = calcularHoras(item.entrada, item.saida);
+            [item.setor, item.nome, item.matricula, item.funcao, item.entrada, item.saida, horas].forEach(txt => row.insertCell().textContent = txt);
+            // Botão de remover
+            const cellAcao = row.insertCell();
+            const btnRemover = document.createElement("button");
+            btnRemover.textContent = "Remover";
+            btnRemover.onclick = function() {
+              if (confirm("Deseja remover este colaborador?")) {
+                tabela.deleteRow(row.rowIndex - 1);
+                salvarLocal();
+              }
+            };
+            cellAcao.appendChild(btnRemover);
+            count++;
+          }
+        });
+        salvarLocal();
+        alert("Importação concluída! " + count + " colaborador(es) importado(s).");
+      } catch (err) {
+        alert("Erro ao importar JSON: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+  });
+  fileInput.click();
+}
+
+function exportarExcel() {
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.table_to_sheet(document.getElementById("tabela"));
+  XLSX.utils.book_append_sheet(wb, ws, "RDS");
+  XLSX.writeFile(wb, "rds_colaboradores.xlsx");
+}
+
+function limparTabela() {
+  tabela.innerHTML = "";
+  document.getElementById("filtro_setor").value = "";
+  document.getElementById("buscar_nome").value = "";
+  salvarLocal();
+  filtrarTabela();
+}
+
+function salvarLocal() {
+  localStorage.setItem("rdsTabela", tabela.innerHTML);
+}
+
+function carregarLocal() {
+  const dados = localStorage.getItem("rdsTabela");
+  if (dados) {
+    tabela.innerHTML = dados;
+    // Recria botões de remover
+    Array.from(tabela.rows).forEach(row => {
+      if (row.cells.length === 8 && !row.cells[7].querySelector("button")) {
+        const btnRemover = document.createElement("button");
+        btnRemover.textContent = "Remover";
+        btnRemover.onclick = function() {
+          if (confirm("Deseja remover este colaborador?")) {
+            tabela.deleteRow(row.rowIndex - 1);
+            salvarLocal();
+          }
+        };
+        row.cells[7].appendChild(btnRemover);
+      }
+    });
+  }
+}
+
+function filtrarTabela() {
+  const filtroSetor = document.getElementById("filtro_setor").value.toLowerCase();
+  const buscaNome = document.getElementById("buscar_nome").value.toLowerCase();
+  Array.from(tabela.rows).forEach(row => {
+    const setor = row.cells[0].textContent.toLowerCase();
+    const nome = row.cells[1].textContent.toLowerCase();
+    row.style.display = (setor.includes(filtroSetor) && nome.includes(buscaNome)) ? "" : "none";
+  });
+}
+
+carregarLocal();
+</script>
+
+</body>
+</html>
