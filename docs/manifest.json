@@ -1,0 +1,21 @@
+{
+  "name": "RDS Fácil - CSS Construtora",
+  "short_name": "RDS Fácil",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#004aad",
+  "description": "Sistema de ponto digital e relatório diário de serviço da CSS Construtora.",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
